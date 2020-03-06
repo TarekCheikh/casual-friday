@@ -1,0 +1,32 @@
+# This is my vagrant config file for deploying CI/CD composed of:
+# Gitlab, Jenkins, SonarQube and Artifactory
+
+Vagrant.configure("2") do |config|
+	# Global for all VMs
+	# Put it here
+
+	# jenkins VM
+	config.vm.define "jenkins" do |jenkins|
+		jenkins.vm.network "private_network", ip: "192.168.100.10"
+		jenkins.vm.box = "ubuntu/bionic64"
+		jenkins.vm.hostname = "jenkins"
+		jenkins.vm.provision "file", source: "../provision-scripts/nginx_jenkins.default", destination: "/tmp/nginx_jenkins.default"
+		jenkins.vm.provision :shell, :path => "../provision-scripts/jenkins.sh"
+		jenkins.vm.provider "virtualbox" do |jenkins|
+			jenkins.customize [ "modifyvm", :id, "--cpus", "2" ]
+			jenkins.customize [ "modifyvm", :id, "--memory", "2048" ]
+		end
+	end
+
+	# gitlab VM
+	config.vm.define "gitlab" do |gitlab|
+		gitlab.vm.network "private_network", ip: "192.168.100.20"
+		gitlab.vm.box = "ubuntu/bionic64"
+		gitlab.vm.hostname = "gitlab"
+		gitlab.vm.provision :shell, :path => "../provision-scripts/gitlab.sh"
+		gitlab.vm.provider "virtualbox" do |gitlab|
+			gitlab.customize [ "modifyvm", :id, "--cpus", "2" ]
+			gitlab.customize [ "modifyvm", :id, "--memory", "4096" ]
+		end
+	end
+end
